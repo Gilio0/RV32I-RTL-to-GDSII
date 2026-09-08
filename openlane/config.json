@@ -1,0 +1,14 @@
+{
+  "DESIGN_NAME": "rv32i_core",
+  "VERILOG_FILES": [
+    "dir::../rtl/core/rv32i_core.sv",
+    "dir::../rtl/core/rv32i_pkg.sv",
+    "dir::../rtl/core/rv32i_alu.sv",
+    "dir::../rtl/core/rv32i_regfile.sv"
+  ],
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 20.0,
+  "FP_CORE_UTIL": 45,
+  "PL_TARGET_DENSITY": 0.55,
+  "RT_MAX_LAYER": "met4"
+}
