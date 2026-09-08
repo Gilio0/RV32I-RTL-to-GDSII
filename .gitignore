@@ -1,0 +1,25 @@
+# Generated simulation and EDA output
+*.log
+*.vcd
+*.fst
+*.wlf
+*.vpd
+*.ucdb
+*.jou
+*.rpt
+*.tmp
+
+# Tool output
+runs/
+results/
+work/
+transcript
+*.swp
+
+# Editor / OS
+.vscode/
+.idea/
+*.bak
+.DS_Store
+
+# Keep curated reports and documentation under version control.
