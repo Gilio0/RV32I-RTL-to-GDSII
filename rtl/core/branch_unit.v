@@ -15,7 +15,6 @@ module branch_unit (
     input wire [`DATA_WIDTH-1:0] i_b,
     output reg o_take
 );
-
     always @* begin
         o_take = 0;
         if(i_branch) begin
@@ -57,5 +56,4 @@ module branch_unit (
             endcase
         end
     end
-
 endmodule

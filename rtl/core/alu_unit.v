@@ -13,7 +13,7 @@
 
 `define DATA_WIDTH 32
 
-module alu (
+module alu_unit (
     input wire [5:0] i_alu_op,
     input wire [`DATA_WIDTH-1:0] i_a,
     input wire [`DATA_WIDTH-1:0] i_b,

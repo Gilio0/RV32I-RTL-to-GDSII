@@ -12,33 +12,30 @@ module register_file (
     output wire [`DATA_WIDTH-1:0] o_rs1,     
     output wire [`DATA_WIDTH-1:0] o_rs2
 );
-    //32 Register 
+  
     reg [`NUM_REGISTER-1:0] registers [`DATA_WIDTH-1:0];
     integer i;
 
     initial begin
-        registers[0] = 0;
-        registers[1] = 1;
-        registers[2] = 2;
-        registers[3] = 3;
-        registers[4] = 4;
-        registers[31] = 0;
+        for (i = 0; i < `NUM_REGISTER; i = i + 1) begin
+            registers[i] = 0;  // Initialize each memory location to 0
+        end
     end
 
-    always @(posedge i_clk or posedge i_rst) begin
+    always @(posedge i_clk or posedge i_rst) begin        
         if(i_rst) begin        
             for (i = 0; i < `NUM_REGISTER; i = i + 1) begin
                 registers[i] <= 0;
-            end
+        end            
         end else begin
             if(i_we && i_rd_addr != 0) begin
                 registers[i_rd_addr] <= i_rd;
             end
         end
     end
-    
+  
     // We read every cycle
     assign o_rs1 = registers[i_rs1_addr];
-    assign o_rs2 = registers[i_rs2_addr];
-    
+    assign o_rs2 = registers[i_rs2_addr];    
+  
 endmodule

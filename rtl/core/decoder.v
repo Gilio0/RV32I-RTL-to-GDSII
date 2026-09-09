@@ -1,18 +1,15 @@
 `include "definitions.vh"
 
-module decoder (    
+module decoder (
     input wire [`INST_WIDTH-1:0] i_inst,    
     output wire [`OPCODE-1:0] o_opcode,
-    
-    //Control Signals
     output reg o_branch,
-    output reg [1:0] o_result_mux, //# alu= 2'b00, pc+4 = 2'b01, mem = 2'b10
+    output reg [1:0] o_result_mux,
     output reg [2:0] o_branch_op,
     output reg o_mem_write,
-    output reg o_alu_src_a, // 0 = reg, 1 = pc
-    output reg o_alu_src_b, // 0 = reg, 1 = imme
+    output reg o_alu_src_a,
+    output reg o_alu_src_b,
     output reg o_reg_write,    
-
     output reg [5:0] o_alu_op,
     output wire [$clog2(`NUM_REGISTER) - 1: 0] o_rs1_addr,
     output wire [$clog2(`NUM_REGISTER) - 1: 0] o_rs2_addr,
@@ -106,8 +103,7 @@ module decoder (
                     default:        o_alu_op = `OP_ALU_NOP;                    
                 endcase
             end
-            `OP_ALUI: begin // Implement ADDI, ANDI, ORI, XORI, etc.
-                
+            `OP_ALUI: begin // Implement ADDI, ANDI, ORI, XORI, etc.                
                 //Take IMME. as a source
                 o_alu_src_b = 1;
                 o_reg_write = 1;
@@ -116,16 +112,16 @@ module decoder (
                     3'b110: o_alu_op = `OP_ALU_OR;      // ORI operation
                     3'b111: o_alu_op = `OP_ALU_AND;     // ANDI operation                                        
                     3'b100: o_alu_op = `OP_ALU_XOR;     // XORI operation
-                    3'b001: o_alu_op = `OP_ALU_SLL;     // SLLI operation
-                    3'b010: o_alu_op = `OP_ALU_SLT;    // SLTI operation
-                    3'b011: o_alu_op = `OP_ALU_SLTU;   // SLTIU operation
+                    3'b001: o_alu_op = `OP_ALU_SLL;    	// SLLI operation
+                    3'b010: o_alu_op = `OP_ALU_SLT;    	// SLTI operation
+                    3'b011: o_alu_op = `OP_ALU_SLTU;	// SLTIU operation
                     3'b101: begin
                         if (i_inst[30])
-                            o_alu_op = `OP_ALU_SRA;  // SRAI
+                            o_alu_op = `OP_ALU_SRA;  	// SRAI
                         else
-                            o_alu_op = `OP_ALU_SRL;  // SRLI
+                            o_alu_op = `OP_ALU_SRL;  	// SRLI
                     end
-                    default: o_alu_op = `OP_ALU_NOP; // Do nothing (is actually an error)
+                    default: o_alu_op = `OP_ALU_NOP;
                 endcase
             end
             `OP_FENCE: begin  // Fence
@@ -141,7 +137,6 @@ module decoder (
     end
     assign o_opcode = opcode;
     assign o_rd_addr = i_inst[11:7];
-    //LUI is actually rd <= imm20 << 12, which is the same as <=> rd <= x0 + imm20 << 12
     assign o_rs1_addr = `OP_LUI == opcode ? 5'b00000 : i_inst[19:15];
     assign o_rs2_addr = i_inst[24:20];
 
