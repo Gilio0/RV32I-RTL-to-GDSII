@@ -1,66 +1,80 @@
 # Architecture
 
-## Scope
+## Current baseline
 
-The first implementation targets the **RV32I base integer ISA** with 32-bit registers and a 32-bit program counter. Privileged architecture, caches, MMU, interrupts, and optional extensions are intentionally out of scope for the first milestone.
+The project uses an existing **RV32I single-cycle processor** as the functional baseline. Its RTL blocks and existing directed testbenches are retained unchanged while the microarchitecture is migrated to a pipeline.
 
-## Microarchitecture
+The baseline is based on an implementation provided by **Bitspinner**.
 
-Target implementation: classic 5-stage pipeline.
+## Single-cycle datapath
+
+The baseline datapath contains:
+
+```text
+PC
+│
+├── Instruction Memory
+├── Decoder
+├── Register File
+├── Sign/Immediate Extension
+├── ALU
+├── Branch Unit
+├── Data Memory
+└── Write-back / next-PC paths
+```
+
+The corresponding architecture diagram is stored under `docs/images/`.
+
+## Pipeline target
+
+The single-cycle datapath will be reorganized into:
 
 ```text
 IF → ID → EX → MEM → WB
 ```
 
-### Pipeline responsibilities
+with pipeline registers:
 
-- **IF:** program counter, instruction fetch, next-PC selection
-- **ID:** instruction decode, register-file read, immediate generation
-- **EX:** ALU operations, branch comparison/target calculation
-- **MEM:** load/store interface
-- **WB:** architectural register write-back
+```text
+IF/ID → ID/EX → EX/MEM → MEM/WB
+```
 
-## Core interfaces
+### IF
+- PC
+- instruction fetch
+- PC + 4
+- next-PC selection
 
-The core will use explicit instruction and data-memory interfaces rather than embedding large memories in the processor. This keeps the CPU reusable and makes the UVM environment and ASIC integration cleaner.
+### ID
+- instruction decode
+- register-file read
+- immediate generation
+- control generation
 
-### Instruction interface
+### EX
+- ALU operation
+- ALU operand selection
+- branch comparison
+- branch/jump target calculation
 
-- `imem_valid`
-- `imem_addr`
-- `imem_rdata`
+### MEM
+- load/store access
+- memory control
 
-### Data interface
+### WB
+- ALU/load/PC+4 result selection
+- architectural register write
 
-- `dmem_valid`
-- `dmem_we`
-- `dmem_addr`
-- `dmem_wdata`
-- `dmem_wstrb`
-- `dmem_rdata`
+## Pipeline hazards
 
-The exact handshake will be frozen before RTL implementation and documented in the interface package.
+The pipelined implementation will address:
 
-## RV32I instruction groups
+- RAW data hazards
+- forwarding from later stages
+- load-use stalls
+- control hazards
+- branch/jump flushing
 
-The decoder will cover:
+## RTL baseline preservation
 
-- LUI / AUIPC
-- JAL / JALR
-- conditional branches
-- loads
-- stores
-- immediate ALU operations
-- register-register ALU operations
-
-## Design invariants
-
-- `x0` always reads as zero.
-- Writes to `x0` are ignored.
-- Instructions advance only when their pipeline control permits it.
-- Taken control transfers flush younger instructions.
-- Load-use dependencies are stalled or otherwise resolved according to the hazard unit design.
-
-## Future extensions
-
-After the base core is stable, possible extensions include Zicsr, machine-mode support, interrupts, simple caches, and additional ISA extensions. These are not part of the initial signoff target.
+No existing RTL or testbench files are changed as part of documenting the baseline and preparing the pipeline migration. New pipeline-specific RTL will be developed separately so the original implementation remains available as a reference.

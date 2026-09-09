@@ -1,83 +1,87 @@
 # RV32I RTL-to-GDSII
 
-A complete RV32I RISC-V processor project covering RTL design, UVM-based verification, synthesis, timing analysis, physical design, signoff, and GDSII generation using the Sky130 PDK.
+A complete RV32I RISC-V processor project progressing from RTL design through verification, synthesis, physical design, signoff, and GDSII generation.
 
-## Project status
+## Current status
 
-**Phase 0 — Repository and architecture scaffold**
+### Phase 1 — RV32I single-cycle baseline completed
 
-The implementation will be developed incrementally. The first hardware target is a clean RV32I core with a 5-stage pipeline, followed by constrained-random UVM verification and the ASIC flow.
+The project now starts from a previously implemented RV32I single-cycle processor baseline. The baseline includes the core RTL blocks and their existing directed testbenches.
+
+The initial implementation was provided by **Bitspinner** and is being used as the functional starting point for the next stage of the project.
+
+### Phase 2 — 5-stage pipeline migration in progress
+
+The next step is to transform the working single-cycle datapath into a classic:
+
+```text
+IF → ID → EX → MEM → WB
+```
+
+The existing RTL and testbenches are intentionally preserved unchanged while the pipeline architecture is developed.
+
+## Single-cycle baseline
+
+The baseline contains:
+
+- Program counter
+- Instruction memory
+- RV32I decoder
+- Register file
+- Immediate/sign extension logic
+- ALU
+- Branch unit
+- Data memory
+- Single-cycle control and write-back paths
+
+The baseline instruction reference is stored in `docs/reference/rv32i_instruction_table.pdf`.
+
+## Migration to pipeline
+
+The single-cycle datapath will be partitioned using four pipeline registers:
+
+```text
+IF/ID → ID/EX → EX/MEM → MEM/WB
+```
+
+Target stage responsibilities:
+
+- **IF:** PC and instruction fetch
+- **ID:** decode, register-file read, immediate generation
+- **EX:** ALU, branch comparison and target calculation
+- **MEM:** data-memory access
+- **WB:** register write-back
+
+The pipeline phase will add the required control/data propagation, forwarding, hazard detection, stalls, and flushes without modifying the original single-cycle RTL/testbench baseline.
+
+## Documentation and references
+
+- `docs/images/` — architecture diagrams
+- `docs/reference/` — ISA reference material
+- `docs/PIPELINE_MIGRATION.md` — migration plan and current work
+- `docs/ARCHITECTURE.md` — processor architecture
+- `docs/VERIFICATION.md` — verification plan
 
 ## Planned flow
 
 ```text
-RV32I ISA
-   ↓
-RTL architecture
-   ↓
-5-stage pipeline
-   ↓
-Directed + UVM verification
-   ↓
+RV32I single-cycle baseline
+        ↓
+5-stage pipelined RTL
+        ↓
+Forwarding + hazard detection
+        ↓
+UVM verification
+        ↓
 Assertions + functional coverage
-   ↓
-RISC-V architectural tests
-   ↓
+        ↓
+ISA-level regression
+        ↓
 Synthesis + STA
-   ↓
+        ↓
 Sky130 floorplan / placement / CTS / routing
-   ↓
+        ↓
 DRC / LVS / final STA
-   ↓
+        ↓
 GDSII
 ```
-
-## Repository structure
-
-- `rtl/` — synthesizable RTL
-- `tb/uvm/` — UVM testbench
-- `assertions/` — SystemVerilog assertions
-- `tests/` — directed and regression tests
-- `riscv_tests/` — architectural/ISA tests
-- `sim/` — simulator entry points and file lists
-- `scripts/` — reproducible simulation, lint, synthesis, and flow scripts
-- `constraints/` — SDC timing constraints
-- `openlane/` — Sky130/OpenLane configuration
-- `pnr/` — physical-design inputs and run notes
-- `reports/` — selected reproducible results
-- `docs/` — architecture, verification, and physical-design documentation
-
-## Verification goals
-
-The verification environment will include:
-
-- UVM agent(s) for instruction/data memory interfaces
-- Transaction-level monitors
-- Reference model / architectural predictor
-- Scoreboard at the architectural commit boundary
-- Constrained-random instruction streams
-- Functional coverage
-- SystemVerilog assertions
-- Directed corner-case tests
-- RISC-V ISA/compliance-oriented testing
-
-## ASIC goals
-
-The final target is a synthesizable RV32I core taken through the Sky130-based RTL-to-GDSII flow. Final results will record area, utilization, timing (WNS/TNS), clock target, power estimates where available, and DRC/LVS status.
-
-## Development strategy
-
-Work is organized into small milestones so every stage remains verifiable:
-
-1. ISA definition and microarchitecture
-2. Single-cycle functional reference
-3. 5-stage pipelined RTL
-4. Hazard detection and forwarding
-5. UVM environment
-6. Assertions and coverage
-7. ISA-level regression
-8. Synthesis and STA
-9. Floorplanning through routing
-10. Signoff and GDSII
-
-See `docs/ARCHITECTURE.md`, `docs/VERIFICATION.md`, and `docs/PHYSICAL_DESIGN.md` for the detailed plan.
